@@ -65,14 +65,15 @@ RUN cmake3 \
 	-DHDF5_C_INCLUDE_DIR=/usr/include \
 	-DHDF5_C_LIBRARY_RELEASE=/usr/lib64/libhdf5.so \
 	-DMINIZIP_INCLUDE_DIR=/usr/include \
-	-DMINIZIP_INCLUDE_DIR=../dependencies/zlib/contrib/minizip \
-	# -DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/contrib/minizip/minizip.o \
 	-DMINIZIP_LIBRARY_RELEASE=/usr/lib64/libminizip.so \
-	-DZLIB_INCLUDE_DIR=../dependencies/zlib \
-	# -DZLIB_LIBRARY_RELEASE=../dependencies/zlib/libz.a \
+	# -DMINIZIP_INCLUDE_DIR=../dependencies/zlib/contrib/minizip \
+	# -DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/contrib/minizip/minizip.o \
+	-DZLIB_INCLUDE_DIR=/usr/include \
 	-DZLIB_LIBRARY_RELEASE=/usr/lib64/libz.so \
+	# -DZLIB_INCLUDE_DIR=../dependencies/zlib \
+	# -DZLIB_LIBRARY_RELEASE=../dependencies/zlib/libz.a \
 	-DUUID_LIBRARY_RELEASE=/usr/lib64/libuuid.so \
 	-DCMAKE_BUILD_TYPE=Release \
 	../fesapi
 
-#RUN make -k
+RUN make -k
