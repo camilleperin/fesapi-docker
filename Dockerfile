@@ -58,13 +58,18 @@ RUN make
 #RUN wget http://prdownloads.sourceforge.net/swig/swig-3.0.12.tar.gz
 #RUN tar xf swig-3.0.12.tar.gz
 
+WORKDIR /fesapiEnv/java
+ADD jdk-8u202-linux-x64.tar.gz .
+ENV JAVA_HOME=/fesapiEnv/java/jdk1.8.0_202
+#ENV PATH=/fesapiEnv/java/jdk-8u202-linux-x64/bin:$PATH
+
 WORKDIR /fesapiEnv/build
 RUN cmake3 \
 	# -DHDF5_C_INCLUDE_DIR=../dependencies/hdf5/include \
 	# -DHDF5_C_LIBRARY_RELEASE=../dependencies/hdf5/lib/libhdf5.so \
 	-DHDF5_C_INCLUDE_DIR=/usr/include \
 	-DHDF5_C_LIBRARY_RELEASE=/usr/lib64/libhdf5.so \
-	-DMINIZIP_INCLUDE_DIR=/usr/include \
+	-DMINIZIP_INCLUDE_DIR=/usr/include/minizip \
 	-DMINIZIP_LIBRARY_RELEASE=/usr/lib64/libminizip.so \
 	# -DMINIZIP_INCLUDE_DIR=../dependencies/zlib/contrib/minizip \
 	# -DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/contrib/minizip/minizip.o \
@@ -73,7 +78,9 @@ RUN cmake3 \
 	# -DZLIB_INCLUDE_DIR=../dependencies/zlib \
 	# -DZLIB_LIBRARY_RELEASE=../dependencies/zlib/libz.a \
 	-DUUID_LIBRARY_RELEASE=/usr/lib64/libuuid.so \
+	-DWITH_JAVA_WRAPPING=ON \
 	-DCMAKE_BUILD_TYPE=Release \
 	../fesapi
 
-RUN make -k
+#RUN make VERBOSE=ON
+#RUN make install
