@@ -20,6 +20,12 @@ RUN rpm -ivh epel-release-latest-7.noarch.rpm
 RUN yum install -y \
 	cmake3
 
+ENV CFLAGS="-fPIC -O2"
+#ENV CFLAGS="-fPIC -O2 -std=gnu99"
+#ENV CXXFLAGS="-fPIC -O2 -std=c++98"
+ENV CXXFLAGS="-fPIC -O2"
+#ENV CXXFLAGS="-fPIC -O2 -std=c++03"
+
 #ADD http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 #RUN rpm -ivh epel-release-6-8.noarch.rpm
 #RUN yum install -y \
@@ -36,34 +42,15 @@ RUN mkdir -p $FES_INSTALL_DIR
 WORKDIR /fesapiEnv/dependencies
 RUN git clone https://github.com/madler/zlib.git
 WORKDIR zlib
-RUN CFLAGS=-fPIC ./configure --static --prefix=$FES_INSTALL_DIR
+#RUN CFLAGS=-fPIC ./configure --static --prefix=$FES_INSTALL_DIR
+#RUN CFLAGS="-fPIC -O2 -std=gnu99" ./configure --static --prefix=$FES_INSTALL_DIR
+RUN ./configure --static --prefix=$FES_INSTALL_DIR
 RUN make -j12
 RUN make
 WORKDIR contrib/minizip
-RUN echo CFLAGS=-fPIC -O -I../.. >> Makefile
+#RUN echo CFLAGS=-fPIC -O -I../.. >> Makefile
+RUN echo CFLAGS+= $CFLAGS >> Makefile
 RUN make
-
-#WORKDIR /fesapiEnv/dependencies/zlib
-#RUN make install
-
-#WORKDIR /fesapiEnv/dependencies
-#RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/util-linux-2.33.tar.gz
-#RUN tar xf util-linux-2.33.tar.gz
-#WORKDIR util-linux-2.33
-#RUN ./configure
-#RUN make
-
-#WORKDIR /fesapiEnv/dependencies
-#RUN wget https://github.com/Kitware/CMake/releases/download/v3.14.0/cmake-3.14.0.tar.gz
-#RUN tar xf cmake-3.14.0.tar.gz
-#WORKDIR cmake-3.14.0
-#RUN ./bootstrap
-#RUN make -j 8
-#RUN make install
-
-#WORKDIR /fesapiEnv/dependencies
-#RUN wget http://prdownloads.sourceforge.net/swig/swig-3.0.12.tar.gz
-#RUN tar xf swig-3.0.12.tar.gz
 
 WORKDIR /fesapiEnv/java
 ADD jdk-8u202-linux-x64.tar.gz .
@@ -76,7 +63,7 @@ ADD hdf5-1.8.21.tar.gz .
 #RUN tar xf hdf5-1.10.5.tar.gz
 WORKDIR hdf5-1.8.21
 #RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
-RUN CFLAGS=-fPIC ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
+RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
 RUN make VERBOSE=ON -j 12
 RUN make install
 
@@ -86,7 +73,7 @@ ADD util-linux-2.33.tar.gz .
 #RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/util-linux-2.33.tar.gz
 #RUN tar xf util-linux-2.33.tar.gz
 WORKDIR util-linux-2.33
-RUN CFLAGS=-fPIC ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
+RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
 RUN make -j12
 RUN make install
 
@@ -113,5 +100,9 @@ RUN cmake3 \
 	#-DWITH_JAVA_WRAPPING=ON \
 	-DCMAKE_BUILD_TYPE=Release \
 	../fesapi
-RUN make VERBOSE=ON -j12
+RUN make VERBOSE=ON -j12 FesapiCpp
 RUN make install
+RUN tar cfz libFesapiCpp.tar.gz install
+
+#Retreive compiled file on the host
+#docker cp fervent_wright:/fesapiEnv/build/install/libFesapiCpp.tar.gz .
