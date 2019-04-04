@@ -14,23 +14,15 @@ RUN yum update -y \
 	gcc \
 	gcc-c++ \
 	make \
-	byacc
-	# libuuid-devel \
-	# minizip-devel \
+	byacc \
+	java-1.8.0-openjdk-devel
 
 WORKDIR fesapiEnv
 
 ENV MAKE_OPTS=-j12
 
 ENV CFLAGS="-fPIC -O2"
-#ENV CFLAGS="-fPIC -O2 -std=gnu99"
-#ENV CXXFLAGS="-fPIC -O2 -std=c++98"
 ENV CXXFLAGS="-fPIC -O2"
-#ENV CXXFLAGS="-fPIC -O2 -std=c++03"
-
-#WORKDIR dependencies
-#RUN wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.21/bin/hdf5-1.8.21-Std-centos7-x86_64-shared_64.tar.gz
-#RUN tar xf hdf5-1.8.21-Std-centos7-x86_64-shared_64.tar.gz
 
 WORKDIR /fesapiEnv/dependencies
 ENV FES_INSTALL_DIR=/fesapiEnv/dependencies/install
@@ -38,18 +30,18 @@ RUN mkdir -p $FES_INSTALL_DIR
 ENV PATH=$FES_INSTALL_DIR/bin:$PATH
 
 WORKDIR /fesapiEnv/dependencies
-#ADD util-linux-2.33.tar.gz .
-ADD https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/util-linux-2.33.tar.gz .
-RUN tar xf util-linux-2.33.tar.gz
+ADD util-linux-2.33.tar.gz .
+#ADD https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/util-linux-2.33.tar.gz .
+#RUN tar xf util-linux-2.33.tar.gz
 WORKDIR util-linux-2.33
 RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
 RUN make $MAKE_OPTS
 RUN make install
 
 WORKDIR /fesapiEnv/dependencies
-ADD https://github.com/Kitware/CMake/releases/download/v3.14.1/cmake-3.14.1-Linux-x86_64.tar.gz .
-RUN tar xf cmake-3.14.1-Linux-x86_64.tar.gz
-#ADD cmake-3.14.1-Linux-x86_64.tar.gz .
+#ADD https://github.com/Kitware/CMake/releases/download/v3.14.1/cmake-3.14.1-Linux-x86_64.tar.gz .
+#RUN tar xf cmake-3.14.1-Linux-x86_64.tar.gz
+ADD cmake-3.14.1-Linux-x86_64.tar.gz .
 ENV PATH=/fesapiEnv/dependencies/cmake-3.14.1-Linux-x86_64/bin:$PATH
 
 
@@ -73,31 +65,23 @@ RUN make
 RUN make install
 
 WORKDIR /fesapiEnv/dependencies
-#ADD hdf5-1.8.21.tar.gz .
-ADD https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.21/src/hdf5-1.8.21.tar.gz .
-RUN tar xf hdf5-1.8.21.tar.gz
+ADD hdf5-1.8.21.tar.gz .
+#ADD https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.21/src/hdf5-1.8.21.tar.gz .
+#RUN tar xf hdf5-1.8.21.tar.gz
 WORKDIR hdf5-1.8.21
 #RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
 RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR --with-zlib=$FES_INSTALL_DIR
 RUN make VERBOSE=ON $MAKE_OPTS
 RUN make install
 
-
-#WORKDIR /fesapiEnv/dependencies
-#ADD jdk-8u202-linux-x64.tar.gz .
-#ENV JAVA_HOME=/fesapiEnv/dependencies/jdk1.8.0_202
-#ENV PATH=$JAVA_HOME/bin:$PATH
-RUN yum install -y java-1.8.0-openjdk-devel
-
 WORKDIR /fesapiEnv/dependencies
-RUN git clone https://github.com/swig/swig.git
-#ADD swig swig
+#RUN git clone https://github.com/swig/swig.git
+ADD swig swig
 WORKDIR swig
 RUN ./autogen.sh
 RUN ./configure --prefix=$FES_INSTALL_DIR
 RUN make $MAKE_OPTS
 RUN make install
-
 
 WORKDIR /fesapiEnv
 #RUN git clone https://github.com/F2I-Consulting/fesapi.git
@@ -132,6 +116,11 @@ RUN make VERBOSE=ON $MAKE_OPTS FesapiCpp
 RUN make VERBOSE=ON $MAKE_OPTS
 RUN make install
 RUN tar cfz libFesapiCpp.tar.gz install
+
+#ADD TestFesapi.jar .
+#ADD TRAINING_1_1_1.epc .
+#ADD TRAINING_1_1_1.h5 .
+#RUN java -Djava.library.path=install/lib -cp install/lib/fesapiJava-0.15.0.0.jar -jar TestFesapi.jar TRAINING_1_1_1.epc
 
 # #Retreive compiled file on the host
 # #docker cp fervent_wright:/fesapiEnv/build/libFesapiCpp.tar.gz .
