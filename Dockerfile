@@ -14,13 +14,14 @@ RUN yum update -y \
 	gcc \
 	gcc-c++ \
 	make \
-	byacc
+	byacc \
+	java-1.8.0-openjdk-devel
 	# libuuid-devel \
 	# minizip-devel \
 
 WORKDIR fesapiEnv
 
-ENV MAKE_OPTS=-j12
+#ENV MAKE_OPTS=-j12
 
 ENV CFLAGS="-fPIC -O2"
 #ENV CFLAGS="-fPIC -O2 -std=gnu99"
@@ -87,7 +88,7 @@ RUN make install
 #ADD jdk-8u202-linux-x64.tar.gz .
 #ENV JAVA_HOME=/fesapiEnv/dependencies/jdk1.8.0_202
 #ENV PATH=$JAVA_HOME/bin:$PATH
-RUN yum install -y java-1.8.0-openjdk-devel
+#RUN yum install -y java-1.8.0-openjdk-devel
 
 WORKDIR /fesapiEnv/dependencies
 RUN git clone https://github.com/swig/swig.git
