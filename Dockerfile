@@ -16,22 +16,13 @@ RUN yum update -y \
 	make \
 	byacc \
 	java-1.8.0-openjdk-devel
-	# libuuid-devel \
-	# minizip-devel \
 
 WORKDIR fesapiEnv
 
 #ENV MAKE_OPTS=-j12
 
 ENV CFLAGS="-fPIC -O2"
-#ENV CFLAGS="-fPIC -O2 -std=gnu99"
-#ENV CXXFLAGS="-fPIC -O2 -std=c++98"
 ENV CXXFLAGS="-fPIC -O2"
-#ENV CXXFLAGS="-fPIC -O2 -std=c++03"
-
-#WORKDIR dependencies
-#RUN wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.21/bin/hdf5-1.8.21-Std-centos7-x86_64-shared_64.tar.gz
-#RUN tar xf hdf5-1.8.21-Std-centos7-x86_64-shared_64.tar.gz
 
 WORKDIR /fesapiEnv/dependencies
 ENV FES_INSTALL_DIR=/fesapiEnv/dependencies/install
@@ -83,13 +74,6 @@ RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_
 RUN make VERBOSE=ON $MAKE_OPTS
 RUN make install
 
-
-#WORKDIR /fesapiEnv/dependencies
-#ADD jdk-8u202-linux-x64.tar.gz .
-#ENV JAVA_HOME=/fesapiEnv/dependencies/jdk1.8.0_202
-#ENV PATH=$JAVA_HOME/bin:$PATH
-#RUN yum install -y java-1.8.0-openjdk-devel
-
 WORKDIR /fesapiEnv/dependencies
 RUN git clone https://github.com/swig/swig.git
 #ADD swig swig
@@ -98,7 +82,6 @@ RUN ./autogen.sh
 RUN ./configure --prefix=$FES_INSTALL_DIR
 RUN make $MAKE_OPTS
 RUN make install
-
 
 WORKDIR /fesapiEnv
 #RUN git clone https://github.com/F2I-Consulting/fesapi.git
