@@ -13,24 +13,14 @@ RUN yum update -y \
 	git \
 	gcc \
 	gcc-c++ \
-	make
+	make \
+	byacc
 	# libuuid-devel \
 	# minizip-devel \
 
 WORKDIR fesapiEnv
 
-#ADD http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm .
-#ADD epel-release-latest-7.noarch.rpm .
-#RUN rpm -ivh epel-release-latest-7.noarch.rpm
-#RUN yum install -y \
-#	cmake3
-
-#ADD http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm .
-#ADD epel-release-6-8.noarch.rpm .
-#RUN rpm -Uvh epel-release-6-8.noarch.rpm .
-#RUN yum install -y \
-#	epel-release
-	#cmake3
+ENV MAKE_OPTS=-j12
 
 ENV CFLAGS="-fPIC -O2"
 #ENV CFLAGS="-fPIC -O2 -std=gnu99"
@@ -45,6 +35,7 @@ ENV CXXFLAGS="-fPIC -O2"
 WORKDIR /fesapiEnv/dependencies
 ENV FES_INSTALL_DIR=/fesapiEnv/dependencies/install
 RUN mkdir -p $FES_INSTALL_DIR
+ENV PATH=$FES_INSTALL_DIR/bin:$PATH
 
 WORKDIR /fesapiEnv/dependencies
 RUN git clone https://github.com/madler/zlib.git
@@ -52,17 +43,16 @@ WORKDIR zlib
 #RUN CFLAGS=-fPIC ./configure --static --prefix=$FES_INSTALL_DIR
 #RUN CFLAGS="-fPIC -O2 -std=gnu99" ./configure --static --prefix=$FES_INSTALL_DIR
 RUN ./configure --static --prefix=$FES_INSTALL_DIR
-RUN make -j12
-RUN make
+RUN make $MAKE_OPTS
 WORKDIR contrib/minizip
 #RUN echo CFLAGS=-fPIC -O -I../.. >> Makefile
 RUN echo CFLAGS+= $CFLAGS >> Makefile
 RUN make
 
-WORKDIR /fesapiEnv/java
+WORKDIR /fesapiEnv/dependencies
 ADD jdk-8u202-linux-x64.tar.gz .
-ENV JAVA_HOME=/fesapiEnv/java/jdk1.8.0_202
-#ENV PATH=/fesapiEnv/java/jdk-8u202-linux-x64/bin:$PATH
+ENV JAVA_HOME=/fesapiEnv/dependencies/jdk1.8.0_202
+ENV PATH=$JAVA_HOME/bin:$PATH
 
 WORKDIR /fesapiEnv/dependencies
 ADD hdf5-1.8.21.tar.gz .
@@ -71,9 +61,8 @@ ADD hdf5-1.8.21.tar.gz .
 WORKDIR hdf5-1.8.21
 #RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
 RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
-RUN make VERBOSE=ON -j 12
+RUN make VERBOSE=ON $MAKE_OPTS
 RUN make install
-
 
 WORKDIR /fesapiEnv/dependencies
 ADD util-linux-2.33.tar.gz .
@@ -81,13 +70,22 @@ ADD util-linux-2.33.tar.gz .
 #RUN tar xf util-linux-2.33.tar.gz
 WORKDIR util-linux-2.33
 RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
-RUN make -j12
+RUN make $MAKE_OPTS
 RUN make install
 
 WORKDIR /fesapiEnv/dependencies
 #ADD https://github.com/Kitware/CMake/releases/download/v3.14.1/cmake-3.14.1-Linux-x86_64.tar.gz .
 ADD cmake-3.14.1-Linux-x86_64.tar.gz .
 ENV PATH=/fesapiEnv/dependencies/cmake-3.14.1-Linux-x86_64/bin:$PATH
+
+WORKDIR /fesapiEnv/dependencies
+#RUN git clone https://github.com/swig/swig.git
+ADD swig swig
+WORKDIR swig
+RUN ./autogen.sh
+RUN ./configure --prefix=$FES_INSTALL_DIR
+RUN make $MAKE_OPTS
+RUN make install
 
 WORKDIR /fesapiEnv
 #RUN git clone https://github.com/F2I-Consulting/fesapi.git
@@ -110,11 +108,11 @@ RUN cmake \
  	# -DUUID_LIBRARY_RELEASE=/usr/lib64/libuuid.so \
  	-DUUID_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libuuid.a \
  	-DUNDER_DEV=FALSE \
- 	#-DWITH_JAVA_WRAPPING=ON \
+ 	-DWITH_JAVA_WRAPPING=ON \
  	-DCMAKE_BUILD_TYPE=Release \
  	../fesapi
 
-RUN make VERBOSE=ON -j12 FesapiCpp
+RUN make VERBOSE=ON $MAKE_OPTS FesapiCpp
 RUN make install
 RUN tar cfz libFesapiCpp.tar.gz install
 
