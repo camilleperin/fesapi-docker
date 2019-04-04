@@ -1,35 +1,42 @@
-FROM centos:7
+FROM centos:6.8
 
 LABEL maintainer="camille.perin@protonmail.com"
 
 RUN yum update -y \
 	&& yum install -y \
+	yum-plugin-ovl \
+	epel-release
+RUN yum update -y \
+	&& yum install -y \
+	automake \
+	pcre-devel \
 	git \
 	gcc \
 	gcc-c++ \
-	make \
+	make
 	# libuuid-devel \
 	# minizip-devel \
-	swig3
 
 WORKDIR fesapiEnv
 
 #ADD http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm .
-ADD epel-release-latest-7.noarch.rpm .
-RUN rpm -ivh epel-release-latest-7.noarch.rpm
-RUN yum install -y \
-	cmake3
+#ADD epel-release-latest-7.noarch.rpm .
+#RUN rpm -ivh epel-release-latest-7.noarch.rpm
+#RUN yum install -y \
+#	cmake3
+
+#ADD http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm .
+#ADD epel-release-6-8.noarch.rpm .
+#RUN rpm -Uvh epel-release-6-8.noarch.rpm .
+#RUN yum install -y \
+#	epel-release
+	#cmake3
 
 ENV CFLAGS="-fPIC -O2"
 #ENV CFLAGS="-fPIC -O2 -std=gnu99"
 #ENV CXXFLAGS="-fPIC -O2 -std=c++98"
 ENV CXXFLAGS="-fPIC -O2"
 #ENV CXXFLAGS="-fPIC -O2 -std=c++03"
-
-#ADD http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-#RUN rpm -ivh epel-release-6-8.noarch.rpm
-#RUN yum install -y \
-#	cmake3
 
 #WORKDIR dependencies
 #RUN wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.21/bin/hdf5-1.8.21-Std-centos7-x86_64-shared_64.tar.gz
@@ -77,32 +84,39 @@ RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_
 RUN make -j12
 RUN make install
 
+WORKDIR /fesapiEnv/dependencies
+#ADD https://github.com/Kitware/CMake/releases/download/v3.14.1/cmake-3.14.1-Linux-x86_64.tar.gz .
+ADD cmake-3.14.1-Linux-x86_64.tar.gz .
+ENV PATH=/fesapiEnv/dependencies/cmake-3.14.1-Linux-x86_64/bin:$PATH
 
 WORKDIR /fesapiEnv
 #RUN git clone https://github.com/F2I-Consulting/fesapi.git
-RUN git clone https://github.com/camilleperin/fesapi.git
+#RUN git clone https://github.com/camilleperin/fesapi.git
+ADD fesapi fesapi
+
 WORKDIR build
-RUN cmake3 \
-	-DHDF5_C_INCLUDE_DIR=$FES_INSTALL_DIR/include \
-	-DHDF5_C_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libhdf5.a \
-	# -DMINIZIP_INCLUDE_DIR=/usr/include/minizip \
-	# -DMINIZIP_LIBRARY_RELEASE=/usr/lib64/libminizip.so \
-	-DMINIZIP_INCLUDE_DIR=../dependencies/zlib/contrib/minizip \
-	# -DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/contrib/minizip/minizip.o \
-	-DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/libz.a \
-	# -DZLIB_INCLUDE_DIR=/usr/include \
-	# -DZLIB_LIBRARY_RELEASE=/usr/lib64/libz.so \
-	-DZLIB_INCLUDE_DIR=../dependencies/zlib \
-	-DZLIB_LIBRARY_RELEASE=../dependencies/zlib/libz.a \
-	# -DUUID_LIBRARY_RELEASE=/usr/lib64/libuuid.so \
-	-DUUID_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libuuid.a \
-	-DUNDER_DEV=FALSE \
-	#-DWITH_JAVA_WRAPPING=ON \
-	-DCMAKE_BUILD_TYPE=Release \
-	../fesapi
+RUN cmake \
+ 	-DHDF5_C_INCLUDE_DIR=$FES_INSTALL_DIR/include \
+ 	-DHDF5_C_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libhdf5.a \
+ 	# -DMINIZIP_INCLUDE_DIR=/usr/include/minizip \
+ 	# -DMINIZIP_LIBRARY_RELEASE=/usr/lib64/libminizip.so \
+ 	-DMINIZIP_INCLUDE_DIR=../dependencies/zlib/contrib/minizip \
+ 	# -DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/contrib/minizip/minizip.o \
+ 	-DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/libz.a \
+ 	# -DZLIB_INCLUDE_DIR=/usr/include \
+ 	# -DZLIB_LIBRARY_RELEASE=/usr/lib64/libz.so \
+ 	-DZLIB_INCLUDE_DIR=../dependencies/zlib \
+ 	-DZLIB_LIBRARY_RELEASE=../dependencies/zlib/libz.a \
+ 	# -DUUID_LIBRARY_RELEASE=/usr/lib64/libuuid.so \
+ 	-DUUID_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libuuid.a \
+ 	-DUNDER_DEV=FALSE \
+ 	#-DWITH_JAVA_WRAPPING=ON \
+ 	-DCMAKE_BUILD_TYPE=Release \
+ 	../fesapi
+
 RUN make VERBOSE=ON -j12 FesapiCpp
 RUN make install
 RUN tar cfz libFesapiCpp.tar.gz install
 
-#Retreive compiled file on the host
-#docker cp fervent_wright:/fesapiEnv/build/install/libFesapiCpp.tar.gz .
+# #Retreive compiled file on the host
+# #docker cp fervent_wright:/fesapiEnv/build/libFesapiCpp.tar.gz .
