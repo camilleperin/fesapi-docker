@@ -39,9 +39,9 @@ RUN make $MAKE_OPTS
 RUN make install
 
 WORKDIR /fesapiEnv/dependencies
+#ADD cmake-3.14.1-Linux-x86_64.tar.gz .
 ADD https://github.com/Kitware/CMake/releases/download/v3.14.1/cmake-3.14.1-Linux-x86_64.tar.gz .
 RUN tar xf cmake-3.14.1-Linux-x86_64.tar.gz
-#ADD cmake-3.14.1-Linux-x86_64.tar.gz .
 ENV PATH=/fesapiEnv/dependencies/cmake-3.14.1-Linux-x86_64/bin:$PATH
 
 
@@ -75,8 +75,8 @@ RUN make VERBOSE=ON $MAKE_OPTS
 RUN make install
 
 WORKDIR /fesapiEnv/dependencies
-RUN git clone https://github.com/swig/swig.git
 #ADD swig swig
+RUN git clone https://github.com/swig/swig.git
 WORKDIR swig
 RUN ./autogen.sh
 RUN ./configure --prefix=$FES_INSTALL_DIR
@@ -84,11 +84,13 @@ RUN make $MAKE_OPTS
 RUN make install
 
 WORKDIR /fesapiEnv
-#RUN git clone https://github.com/F2I-Consulting/fesapi.git
-RUN git clone https://github.com/camilleperin/fesapi.git
+RUN git clone https://github.com/F2I-Consulting/fesapi.git
+WORKDIR fesapi
+RUN git checkout tags/v0.14.0.0
+#RUN git clone https://github.com/camilleperin/fesapi.git
 #ADD fesapi fesapi
 
-WORKDIR build
+WORKDIR /fesapiEnv/build
 RUN cmake \
  	-DHDF5_C_INCLUDE_DIR=$FES_INSTALL_DIR/include \
  	-DHDF5_C_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libhdf5.a \
@@ -108,20 +110,24 @@ RUN cmake \
  	-DUUID_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libuuid.a \
  	-DUNDER_DEV=FALSE \
 	-DWITH_JAVA_WRAPPING=ON \
-	-DWITH_EXAMPLES=ON \
- 	-DCMAKE_BUILD_TYPE=Release \
+	# -DWITH_EXAMPLES=ON \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_C_FLAGS="" \
+	-DCMAKE_CXX_FLAGS="" \
+	-DCMAKE_CXX_FLAGS_RELEASE="-O1 -DNDEBUG" \
+	-DCMAKE_C_FLAGS_RELEASE="-O1 -DNDEBUG" \
  	../fesapi
 
-RUN make VERBOSE=ON $MAKE_OPTS FesapiCpp
+#RUN make VERBOSE=ON $MAKE_OPTS FesapiCpp
 RUN make VERBOSE=ON $MAKE_OPTS
 RUN make install
 RUN tar cfz libFesapiCpp.tar.gz install
 
-#WORKDIR /fesapiEnv
-#RUN git clone https://github.com/camilleperin/fesapi-docker.git
-#WORKDIR fesapi-docker/test/TestFesapi/src 
-#RUN javac -cp /fesapiEnv/build/install/lib/fesapiJava-0.15.0.0.jar com/interactive/TestFesapi.java
-#RUN java -Djava.library.path=/fesapiEnv/build/install/lib -cp /fesapiEnv/build/install/lib/fesapiJava-0.15.0.0.jar:. com.interactive.TestFesapi ../../TRAINING_1_1_1.epc
+WORKDIR /fesapiEnv
+RUN git clone https://github.com/camilleperin/fesapi-docker.git
+WORKDIR fesapi-docker/test/TestFesapi/src 
+RUN javac -cp `find /fesapiEnv/build/install/lib -name fesapiJava*.jar` com/interactive/TestFesapi.java
+RUN java -Djava.library.path=/fesapiEnv/build/install/lib -cp `find /fesapiEnv/build/install/lib -name fesapiJava*.jar`:. com.interactive.TestFesapi ../../TRAINING_1_1_1.epc
 
 # #Retreive compiled file on the host
 # #docker cp fervent_wright:/fesapiEnv/build/libFesapiCpp.tar.gz .
