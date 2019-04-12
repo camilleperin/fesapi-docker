@@ -79,9 +79,6 @@ RUN make install
 WORKDIR /fesapiEnv
 RUN git clone https://github.com/F2I-Consulting/fesapi.git
 WORKDIR fesapi
-RUN git checkout tags/v0.14.0.0
-#RUN git clone https://github.com/camilleperin/fesapi.git
-#ADD fesapi fesapi
 
 WORKDIR /fesapiEnv/build
 RUN cmake \
