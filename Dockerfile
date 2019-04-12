@@ -78,8 +78,6 @@ RUN make install
 
 WORKDIR /fesapiEnv
 RUN git clone https://github.com/F2I-Consulting/fesapi.git
-WORKDIR fesapi
-
 WORKDIR /fesapiEnv/build
 RUN cmake \
  	-DHDF5_C_INCLUDE_DIR=$FES_INSTALL_DIR/include \
