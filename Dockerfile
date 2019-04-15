@@ -48,14 +48,9 @@ ENV PATH=/fesapiEnv/dependencies/cmake-3.14.1-Linux-x86_64/bin:$PATH
 WORKDIR /fesapiEnv/dependencies
 RUN git clone https://github.com/madler/zlib.git
 WORKDIR zlib
-#RUN CFLAGS=-fPIC ./configure --static --prefix=$FES_INSTALL_DIR
-#RUN CFLAGS="-fPIC -O2 -std=gnu99" ./configure --static --prefix=$FES_INSTALL_DIR
 RUN ./configure --static --prefix=$FES_INSTALL_DIR
 RUN make $MAKE_OPTS
 RUN make install
-#WORKDIR contrib/minizip
-#RUN echo CFLAGS+= $CFLAGS >> Makefile
-#RUN make
 
 WORKDIR /fesapiEnv/dependencies
 RUN git clone https://github.com/F2I-Consulting/Minizip.git
@@ -65,11 +60,9 @@ RUN make
 RUN make install
 
 WORKDIR /fesapiEnv/dependencies
-#ADD hdf5-1.8.21.tar.gz .
-ADD https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.21/src/hdf5-1.8.21.tar.gz .
-RUN tar xf hdf5-1.8.21.tar.gz
-WORKDIR hdf5-1.8.21
-#RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
+RUN git clone https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git
+WORKDIR hdf5
+RUN git checkout tags/hdf5-1_8_21
 RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR --with-zlib=$FES_INSTALL_DIR
 RUN make VERBOSE=ON $MAKE_OPTS
 RUN make install
@@ -85,28 +78,14 @@ RUN make install
 
 WORKDIR /fesapiEnv
 RUN git clone https://github.com/F2I-Consulting/fesapi.git
-WORKDIR fesapi
-RUN git checkout tags/v0.14.0.0
-#RUN git clone https://github.com/camilleperin/fesapi.git
-#ADD fesapi fesapi
-
 WORKDIR /fesapiEnv/build
 RUN cmake \
  	-DHDF5_C_INCLUDE_DIR=$FES_INSTALL_DIR/include \
  	-DHDF5_C_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libhdf5.a \
- 	# -DMINIZIP_INCLUDE_DIR=/usr/include/minizip \
- 	# -DMINIZIP_LIBRARY_RELEASE=/usr/lib64/libminizip.so \
- 	# -DMINIZIP_INCLUDE_DIR=../dependencies/zlib/contrib/minizip \
- 	# -DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/contrib/minizip/minizip.o \
-	# -DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/libz.a \
-	# -DMINIZIP_LIBRARY_RELEASE=../dependencies/zlib/minizip.a \
 	-DMINIZIP_INCLUDE_DIR=../dependencies/Minizip/build/install/include \
 	-DMINIZIP_LIBRARY_RELEASE=../dependencies/Minizip/build/install/lib/libminizip.a \
- 	# -DZLIB_INCLUDE_DIR=/usr/include \
- 	# -DZLIB_LIBRARY_RELEASE=/usr/lib64/libz.so \
  	-DZLIB_INCLUDE_DIR=$FES_INSTALL_DIR/include \
  	-DZLIB_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libz.a \
- 	# -DUUID_LIBRARY_RELEASE=/usr/lib64/libuuid.so \
  	-DUUID_LIBRARY_RELEASE=$FES_INSTALL_DIR/lib/libuuid.a \
  	-DUNDER_DEV=FALSE \
 	-DWITH_JAVA_WRAPPING=ON \
