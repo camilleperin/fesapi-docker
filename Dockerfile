@@ -34,7 +34,7 @@ WORKDIR /fesapiEnv/dependencies
 ADD https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/util-linux-2.33.tar.gz .
 RUN tar xf util-linux-2.33.tar.gz
 WORKDIR util-linux-2.33
-RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR
+RUN ./configure --enable-static=yes --enable-shared=false --disable-all-programs --enable-libuuid --prefix=$FES_INSTALL_DIR
 RUN make $MAKE_OPTS
 RUN make install
 
