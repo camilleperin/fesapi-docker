@@ -12,5 +12,5 @@ See : https://github.com/F2I-Consulting/fesapi
 ```
 docker-compose -f docker-compose.yml build  
 docker-compose -f docker-compose.yml up  
-docker cp fesapi-container:/fesapiEnv/build  /libFesapiCpp.tar.gz .
+docker cp fesapi-container:/fesapiEnv/build/libFesapiCpp.tar.gz .
 ```
