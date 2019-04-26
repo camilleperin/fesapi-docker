@@ -108,8 +108,8 @@ RUN tar cfz libFesapiCpp.tar.gz install
 WORKDIR /fesapiEnv
 RUN git clone https://github.com/camilleperin/fesapi-docker.git
 WORKDIR fesapi-docker/test/TestFesapi/src 
-RUN javac -cp `find /fesapiEnv/build/install/lib -name fesapiJava*.jar` com/interactive/TestFesapi.java
-RUN java -Djava.library.path=/fesapiEnv/build/install/lib -cp `find /fesapiEnv/build/install/lib -name fesapiJava*.jar`:. com.interactive.TestFesapi ../../TRAINING_1_1_1.epc
+RUN javac -cp `find /fesapiEnv/build/install -name fesapiJava*.jar` com/interactive/TestFesapi.java
+RUN java -Djava.library.path=/fesapiEnv/build/install/lib64 -cp `find /fesapiEnv/build/install -name fesapiJava*.jar`:. com.interactive.TestFesapi ../../TRAINING_1_1_1.epc
 
 # #Retreive compiled file on the host
 # #docker cp fervent_wright:/fesapiEnv/build/libFesapiCpp.tar.gz .
