@@ -9,6 +9,8 @@ See : https://github.com/F2I-Consulting/fesapi
 
 ## Build, test, retreive built lib
  
+```
 docker-compose -f docker-compose.yml build  
 docker-compose -f docker-compose.yml up  
 docker cp fesapi-container:/fesapiEnv/build  /libFesapiCpp.tar.gz .
+```
