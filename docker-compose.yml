@@ -1,0 +1,5 @@
+version: '3'
+services:
+  fesapi:
+    build: .
+    container_name: fesapi-container
