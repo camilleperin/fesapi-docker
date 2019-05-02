@@ -8,7 +8,7 @@ See : https://github.com/camilleperin/fesapi-docker
 See : https://hub.docker.com/r/zz64/fesapi-docker  
 See : https://github.com/F2I-Consulting/fesapi  
 
-## Build, test, retreive built lib
+## Build locally, test, retreive built lib
  
 ```
 docker-compose -f docker-compose.yml build  
