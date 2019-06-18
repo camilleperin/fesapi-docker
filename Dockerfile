@@ -62,7 +62,7 @@ RUN make install
 WORKDIR /fesapiEnv/dependencies
 RUN git clone https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git
 WORKDIR hdf5
-RUN git checkout tags/hdf5-1_8_21
+RUN git checkout tags/hdf5-1_10_5
 RUN ./configure --enable-static=yes --enable-shared=false --prefix=$FES_INSTALL_DIR --with-zlib=$FES_INSTALL_DIR
 RUN make VERBOSE=ON $MAKE_OPTS
 RUN make install
@@ -81,7 +81,7 @@ RUN git clone https://github.com/F2I-Consulting/fesapi.git
 WORKDIR fesapi
 RUN git fetch
 RUN git pull
-#RUN git checkout tags/v0.15.0.0
+RUN git checkout tags/v0.16.0.0
 WORKDIR /fesapiEnv/build
 RUN cmake \
  	-DHDF5_C_INCLUDE_DIR=$FES_INSTALL_DIR/include \
@@ -99,6 +99,7 @@ RUN cmake \
 	-DCMAKE_CXX_FLAGS="" \
 	-DCMAKE_CXX_FLAGS_RELEASE="-O1 -DNDEBUG" \
 	-DCMAKE_C_FLAGS_RELEASE="-O1 -DNDEBUG" \
+	-DHDF5_1_10=ON \
  	../fesapi
 
 #RUN make VERBOSE=ON $MAKE_OPTS FesapiCpp
